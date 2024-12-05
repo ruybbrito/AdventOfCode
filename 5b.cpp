@@ -34,8 +34,8 @@ void visit(vector<pair<int, int> >& input, vector<int> &query, vector<int> &ans,
 
   mark[val] = 1;
   for (int i = 0; i < input.size(); i++) {
-    if (input[i].first == val) {
-      visit(input, query, ans, mark, input[i].second);
+    if (input[i].second == val) {
+      visit(input, query, ans, mark, input[i].first);
     }
   }
 
@@ -105,3 +105,8 @@ int main() {
   cout << count << endl;
   return 0;
 }
+
+
+// 5114
+// 5150
+// 4868
