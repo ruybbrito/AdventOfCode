@@ -13,26 +13,48 @@ bool is_oob(vector<string>& s, int x, int y) {
   return x < 0 || x >= s.size() || y < 0 || y >= s[0].size();
 }
 
-bool is_valid_gap(vector<string>& s, int x, int y, int xx, int yy) {
-  if (x == xx) {
-    for (int i = min(y, yy) + 1; i < max(y, yy); i++) {
-      if (s[x][i] == '#') {
-        return false;
-      }
+bool contains(vector<int>& v, int t) {
+  for (int i = 0; i < v.size(); i++) {
+    if (v[i] == t) {
+      return true;
     }
-
-    return true;
-  } else if (y == yy) {
-    for (int i = min(x, xx) + 1; i < max(x, xx); i++) {
-      if (s[i][y] == '#') {
-        return false;
-      }
-    }
-
-    return true;
   }
-
   return false;
+}
+
+bool is_loop(vector<string>& s, int rx, int ry, int dir) {
+  map<pair<int, int>, vector<int> > knocked;
+  int x = rx, y = ry, nx, ny;
+  while (true) {
+    if (dir == 0) {
+      nx = x - 1;
+      ny = y;
+    } else if (dir == 1) {
+      nx = x;
+      ny = y + 1;
+    } else if (dir == 2) {
+      nx = x + 1;
+      ny = y;
+    } else if (dir == 3) {
+      nx = x;
+      ny = y - 1;
+    }
+
+    if (is_oob(s, nx, ny)) {
+      return false;
+    }
+
+    if (s[nx][ny] == '#') {
+      if (contains(knocked[make_pair(nx, ny)], dir)) {
+        return true;
+      }
+      knocked[make_pair(nx, ny)].push_back(dir);
+      dir = (dir + 1) % 4;
+    } else {
+      x = nx;
+      y = ny;
+    }
+  }
 }
 
 int main() {
@@ -50,48 +72,38 @@ int main() {
     }
   }
 
+  int rx = x, ry = y;
+  
   map<pair<int, int>, vector<int> > knocked;
-  vector<pair<int, int> > prev;
   set<pair<int, int> > obs; 
       
-  int nx, ny, ans = 0;
+  int nx, ny;
   while (true) {
     // Verify if we could put an obstacle
-    if (prev.size() >= 3) {
-      for (int i = 0; i <= prev.size()-3; i++) {
-        int knockedDir = -1;
-        for (int j = 0; j < knocked[prev[i]].size(); j++) {
-          if (knocked[prev[i]][j] == (dir + 1) % 4) {
-            knockedDir = knocked[prev[i]][j];
-            break;
-          }
-        }
-        if (knockedDir == -1) {
-          continue;
-        }
-
-        if (knockedDir == 0 && y == prev[i].second && x > prev[i].first) {
-          if (is_valid_gap(s, x, y, prev[i].first, prev[i].second)) {
-            cout << x << " " << y - 1 << endl;
-            obs.insert(make_pair(x, y - 1));
-          }
-        } else if (knockedDir == 1 && x == prev[i].first && y < prev[i].second) {
-          if (is_valid_gap(s, x, y, prev[i].first, prev[i].second)) {
-            cout << x - 1 << " " << y << endl;
-            obs.insert(make_pair(x - 1, y));
-          }
-        } else if (knockedDir == 2 && y == prev[i].second && x < prev[i].first) {
-          if (is_valid_gap(s, x, y, prev[i].first, prev[i].second)) {
-            cout << x << " " << y + 1 << endl;
-            obs.insert(make_pair(x, y + 1));
-          }
-        } else if (knockedDir == 3 && x == prev[i].first && y > prev[i].second) {
-          if (is_valid_gap(s, x, y, prev[i].first, prev[i].second)) {
-            cout << x + 1 << " " << y << endl;
-            obs.insert(make_pair(x + 1, y));
-          }
-        }
+    if (dir == 0 && x > 0 && s[x-1][y] == '.') {
+      s[x-1][y] = '#';
+      if (is_loop(s, rx, ry, 0)) {
+        obs.insert(make_pair(x-1, y));
       }
+      s[x-1][y] = '.';
+    } else if (dir == 1 && y < s[0].size()-1 && s[x][y+1] == '.') {
+      s[x][y+1] = '#';
+      if (is_loop(s, rx, ry, 0)) {
+        obs.insert(make_pair(x, y+1));
+      }
+      s[x][y+1] = '.';
+    } else if (dir == 2 && x < s.size()-1 && s[x+1][y] == '.') {
+      s[x+1][y] = '#';
+      if (is_loop(s, rx, ry, 0)) {
+        obs.insert(make_pair(x+1, y));
+      }
+      s[x+1][y] = '.';
+    } else if (dir == 3 && y > 0 && s[x][y-1] == '.') {
+      s[x][y-1] = '#';
+      if (is_loop(s, rx, ry, 0)) {
+        obs.insert(make_pair(x, y-1));
+      }
+      s[x][y-1] = '.';
     }
 
     if (dir == 0) {
@@ -113,8 +125,6 @@ int main() {
     }
 
     if (s[nx][ny] == '#') {
-      prev.push_back(make_pair(nx, ny));
-      knocked[make_pair(nx, ny)].push_back(dir);
       dir = (dir + 1) % 4;
     } else {
       x = nx;
