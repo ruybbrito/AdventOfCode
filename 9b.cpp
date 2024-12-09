@@ -4,6 +4,7 @@
 using namespace std;
 
 // Tries to find a gap of length >= len with index up to r
+// Can be optimized to log(N), but I can't be bothered.
 pair<int, int> findGap(vector<pair<int, int> >& gaps, int len, int r) {
   pair<int, int> bestGap = make_pair(-1, -1);
   for (int i = 0; i < gaps.size(); i++) {
@@ -17,6 +18,7 @@ pair<int, int> findGap(vector<pair<int, int> >& gaps, int len, int r) {
   return bestGap;
 }
 
+// Can be optimized to log(N), but I can't be bothered.
 void removeGap(vector<pair<int, int> >& gaps, pair<int, int> old_gap) {
   for (int i = 0; i < gaps.size(); i++) {
     if (gaps[i] == old_gap) {
@@ -72,7 +74,7 @@ int main() {
 
     removeGap(gaps, gap);
     if (blocks[i].second != gap.second) {
-      pair<int, int> newGap = make_pair(gap.first + gap.second - blocks[i].second + 1, gap.second - blocks[i].second);
+      pair<int, int> newGap = make_pair(gap.first + blocks[i].second, gap.second - blocks[i].second);
       gaps.push_back(newGap);
     }
 
