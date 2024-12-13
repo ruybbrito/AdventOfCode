@@ -54,9 +54,12 @@ int find_sides(vector<string>& m, int i, int j, int mark[200][200]) {
         s++;
       }
     }
-    
+
     if (x == i && y == j && dir == initDir) break;
   }
+
+  // Find if there are islands of non- m[i][j]
+  // If yes, then check their sides and add to s
   
   return s;
 }
