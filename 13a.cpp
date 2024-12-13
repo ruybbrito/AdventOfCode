@@ -4,65 +4,56 @@
 
 using namespace std;
 
-// int memo[101][101];
-pair<int, int> a, b, p;
-
-pair<int, int> mult(int x, int y) {
-  return make_pair(x * a.first + y * b.first, x * a.second + y * a.second);
-}
-
-int sol(int x, int y) {
-  pair<int, int> cur = mult(x, y);
-  if (x > 100 || y > 100) {
-    return 1000000;
-  }
-
-  if (p.first - cur.first < 0 || p.second - cur.second < 0) {
-    return 1000000;
-  }
-
-  if (p.first - cur.first == 0 && p.second - cur.second == 0) {
-    return 3 * x + y;
-  }
-
-  return min(sol(x + 1, y), sol(x, y + 1));  
-}
+long long int P_INT_MAX = 1000000000000000;
+// long long int OFFSET = 10000000000000;
 
 int main() {
-  string s, x;
+  string s;
+  pair<long long int, long long int> a, b, p;
+  long long int ans = 0;
+
   while (getline(cin, s)) {
     if (s == "") {
       continue;
     } else if (s.substr(0, 8) == "Button A") {
       s.erase(0, 12);
       int pos = s.find(", Y+");
-      a.first = stoi(s.substr(0, pos));
+      a.first = stoll(s.substr(0, pos));
       s.erase(0, pos + 4);
-      a.second = stoi(s);
+      a.second = stoll(s);
     } else if (s.substr(0, 8) == "Button B") {
       s.erase(0, 12);
       int pos = s.find(", Y+");
-      b.first = stoi(s.substr(0, pos));
+      b.first = stoll(s.substr(0, pos));
       s.erase(0, pos + 4);
-      b.second = stoi(s);
+      b.second = stoll(s);
     } else if (s.substr(0, 5) == "Prize") {
       s.erase(0, 9);
       int pos = s.find(", Y=");
-      p.first = stoi(s.substr(0, pos));
+      p.first = stoll(s.substr(0, pos));
       s.erase(0, pos + 4);
-      p.second = stoi(s);
+      p.second = stoll(s);
 
-      // for (int i = 0; i < 101; i++) {
-      //   for (int j = 0; j < 101; j++) {
-      //     memo[i][j] = -1;
-      //   }
-      // }
+      long long int sol = P_INT_MAX;
+      for (long long int x = 0; x <= 201; x++) {
+        if (x * a.first > p.first || x * a.second > p.second) {
+          break;
+        }
 
-      cout << sol(0, 0) << endl;
+        pair<long long int, long long int> g = make_pair(p.first - x * a.first, p.second - x * a.second);
+        if (g.first % b.first == 0 && g.second % b.second == 0 && g.first * b.second == g.second * b.first) {
+          int y = g.first / b.first;
+          sol = min(sol, x * 3 + y);
+        }
+      }
+
+      ans += (sol == P_INT_MAX ? 0 : sol);
     }
 
     s = "";
   }
+
+  cout << ans << endl;
 
   return 0;
 }
