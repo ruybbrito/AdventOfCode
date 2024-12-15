@@ -61,29 +61,37 @@ int main() {
     robots.push_back(make_pair(to_pair(p), to_pair(v)));
   }
 
-  map<int, map<pii, int> > cnt;
-  for (int sec = 0; sec <= 10000000; sec++) {
+  for (int sec = 0; sec <= 1000000000; sec++) {
+    int a = 0, b = 0, c = 0, d = 0;
     for (int i = 0; i < robots.size(); i++) {
       pii pos = get_position_on_nth_second(robots[i], sec);
-      cnt[sec][pos]++;
-    }
-  }
-  
-  for (int sec = 0; sec <= 10000000; sec++) {
-    if (!is_symmetric(cnt[sec])) {
-      continue;
+      int q = quadrant(pos);
+      if (q == 0) a++;
+      else if (q == 1) b++;
+      else if (q == 2) c++;
+      else if (q == 3) d++;
     }
 
-    cout << sec << endl;
-    for (int y = 0; y < GRID_H; y++) {
-      for (int x = 0; x < GRID_W; x++) {
-        int k = cnt[sec][make_pair(x, y)];
-        cout << (k == 0 ? "." : (k == 1 ? "X" : "O"));
+    if (a == b && c == d) {
+      map<pii, int> cnt;
+      for (int i = 0; i < robots.size(); i++) {
+        pii pos = get_position_on_nth_second(robots[i], sec);
+        cnt[pos]++;
       }
-      cout << endl;
-    }
 
-    break;
+      if (is_symmetric(cnt)) {
+        cout << sec << endl;
+        for (int y = 0; y < GRID_H; y++) {
+          for (int x = 0; x < GRID_W; x++) {
+            int k = cnt[make_pair(x, y)];
+            cout << (k == 0 ? "." : (k == 1 ? "X" : "O"));
+          }
+          cout << endl;
+        }
+
+        break;
+      }
+    }
   }
 
   return 0;
