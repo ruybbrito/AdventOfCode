@@ -3,9 +3,8 @@
 
 using namespace std;
 
-const int GRID_W = 101;
-const int GRID_H = 103;
-const int SEC = 500;
+const int GRID_W = 101; // 101
+const int GRID_H = 103; // 103
 
 typedef pair<int, int> pii;
 typedef pair<pii, pii> robot;
@@ -50,6 +49,26 @@ int is_symmetric(map<pii, int>& cnt) {
   return 1;
 }
 
+void print_grid(map<pii, int>& cnt, int sec) {
+  cout << sec << endl;
+  for (int y = 0; y < GRID_H; y++) {
+    for (int x = 0; x < GRID_W; x++) {
+      int k = cnt[make_pair(x, y)];
+      cout << (k == 0 ? "." : (k == 1 ? "X" : "O"));
+    }
+    cout << endl;
+  }
+}
+
+bool has_neighbour(map<pii, int>& cnt, pii p) {
+  if (p.first > 0 && cnt[make_pair(p.first - 1, p.second)] > 0) return true;
+  if (p.first < GRID_W - 1 && cnt[make_pair(p.first + 1, p.second)] > 0) return true;
+  if (p.second > 0 && cnt[make_pair(p.first, p.second - 1)] > 0) return true;
+  if (p.second < GRID_H - 1 && cnt[make_pair(p.first, p.second + 1)] > 0) return true;
+  
+  return false;
+}
+
 int main() {
   vector<robot> robots;
   string s, p, v;
@@ -62,35 +81,20 @@ int main() {
   }
 
   for (int sec = 0; sec <= 1000000000; sec++) {
-    int a = 0, b = 0, c = 0, d = 0;
+    map<pii, int> cnt;
     for (int i = 0; i < robots.size(); i++) {
       pii pos = get_position_on_nth_second(robots[i], sec);
-      int q = quadrant(pos);
-      if (q == 0) a++;
-      else if (q == 1) b++;
-      else if (q == 2) c++;
-      else if (q == 3) d++;
+      cnt[pos]++;
     }
 
-    if (a == b && c == d) {
-      map<pii, int> cnt;
-      for (int i = 0; i < robots.size(); i++) {
-        pii pos = get_position_on_nth_second(robots[i], sec);
-        cnt[pos]++;
-      }
+    int a = 0, b = 0;
+    for (map<pii, int>::iterator it = cnt.begin(); it != cnt.end(); it++) {
+      if (has_neighbour(cnt, it->first)) a += it->second;
+      else b += it->second;
+    }
 
-      if (is_symmetric(cnt)) {
-        cout << sec << endl;
-        for (int y = 0; y < GRID_H; y++) {
-          for (int x = 0; x < GRID_W; x++) {
-            int k = cnt[make_pair(x, y)];
-            cout << (k == 0 ? "." : (k == 1 ? "X" : "O"));
-          }
-          cout << endl;
-        }
-
-        break;
-      }
+    if (2 * a >= (a + b)) {
+      print_grid(cnt, sec);
     }
   }
 
