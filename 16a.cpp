@@ -1,5 +1,6 @@
 #include <iostream>
 #include <map>
+#include <set>
 
 using namespace std;
 
@@ -34,24 +35,14 @@ pii get_next(pii pos, int dir) {
   return make_pair(iNext, jNext);
 }
 
-bool vec_contains(vector<raindeer>& path, pii pos) {
-  for (int i = 0; i < path.size(); i++) {
-    if (path[i].first == pos) return true;
-  }
-  return false;
-}
-
-bool can_go(vector<raindeer>& path, pii pos, int dir) {
+bool can_go(set<pii>& path, pii pos, int dir) {
   pii next = get_next(pos, dir);
-  return !is_oob(m, next) && (m[next.first][next.second] == '.' || m[next.first][next.second] == 'E') && !vec_contains(path, next);
+  return !is_oob(m, next) && (m[next.first][next.second] == '.' || m[next.first][next.second] == 'E') && path.find(next) == path.end();
 }
 
-int solve(vector<raindeer>& path, int ans) {
-  raindeer r = path.back();
-  pii pos = r.first;
-  int dir = r.second;
-
+int solve(set<pii>& path, pii pos, int dir, int ans) {
   if (pos == E) {
+    cout << ans << endl;
     return ans;
   }
   
@@ -60,27 +51,27 @@ int solve(vector<raindeer>& path, int ans) {
   // Go straight
   if (can_go(path, pos, dir)) {
     pii next = get_next(pos, dir);
-    path.push_back(make_pair(next, dir));
-    cur_ans = min(cur_ans, solve(path, ans + 1));
-    path.pop_back();
+    path.insert(next);
+    cur_ans = min(cur_ans, solve(path, next, dir, ans + 1));
+    path.erase(path.find(next));
   }
 
   // Can turn right
   int n = next_dir(dir);
   if (can_go(path, pos, n)) {
     pii next = get_next(pos, n);
-    path.push_back(make_pair(next, n));
-    cur_ans = min(cur_ans, solve(path, ans + 1001));
-    path.pop_back();
+    path.insert(next);
+    cur_ans = min(cur_ans, solve(path, next, n, ans + 1001));
+    path.erase(path.find(next));
   }
 
   // Can turn left
   int p = prev_dir(dir);
   if (can_go(path, pos, p)) {
     pii next = get_next(pos, p);
-    path.push_back(make_pair(next, p));
-    cur_ans = min(cur_ans, solve(path, ans + 1001));
-    path.pop_back();
+    path.insert(next);
+    cur_ans = min(cur_ans, solve(path, next, p, ans + 1001));
+    path.erase(path.find(next));
   }
 
   return cur_ans;
@@ -102,9 +93,9 @@ int main() {
     }
   }
 
-  vector<raindeer> path;
-  path.push_back(make_pair(S, 3));
-  cout << solve(path, 0) << endl;
+  set<pii> path;
+  path.insert(S);
+  cout << solve(path, S, 3, 0) << endl;
 
   return 0;
 }
