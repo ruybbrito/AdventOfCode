@@ -1,6 +1,5 @@
 #include <iostream>
 #include <map>
-#include <set>
 
 using namespace std;
 
@@ -35,43 +34,42 @@ pii get_next(pii pos, int dir) {
   return make_pair(iNext, jNext);
 }
 
-bool can_go(set<pii>& path, pii pos, int dir) {
+bool can_go(int mark[150][110], pii pos, int dir) {
   pii next = get_next(pos, dir);
-  return !is_oob(m, next) && (m[next.first][next.second] == '.' || m[next.first][next.second] == 'E') && path.find(next) == path.end();
+  return !is_oob(m, next) && (m[next.first][next.second] == '.' || m[next.first][next.second] == 'E') && !mark[next.first][next.second];
 }
 
-int solve(set<pii>& path, pii pos, int dir, int ans) {
+int solve(int mark[150][110], pii pos, int dir, int ans) {
   if (pos == E) {
-    cout << ans << endl;
     return ans;
   }
   
   int cur_ans = INF;
   
   // Go straight
-  if (can_go(path, pos, dir)) {
+  if (can_go(mark, pos, dir)) {
     pii next = get_next(pos, dir);
-    path.insert(next);
-    cur_ans = min(cur_ans, solve(path, next, dir, ans + 1));
-    path.erase(path.find(next));
+    mark[next.first][next.second] = 1;
+    cur_ans = min(cur_ans, solve(mark, next, dir, ans + 1));
+    mark[next.first][next.second] = 0;
   }
 
   // Can turn right
   int n = next_dir(dir);
-  if (can_go(path, pos, n)) {
+  if (can_go(mark, pos, n)) {
     pii next = get_next(pos, n);
-    path.insert(next);
-    cur_ans = min(cur_ans, solve(path, next, n, ans + 1001));
-    path.erase(path.find(next));
+    mark[next.first][next.second] = 1;
+    cur_ans = min(cur_ans, solve(mark, next, n, ans + 1001));
+    mark[next.first][next.second] = 0;
   }
 
   // Can turn left
   int p = prev_dir(dir);
-  if (can_go(path, pos, p)) {
+  if (can_go(mark, pos, p)) {
     pii next = get_next(pos, p);
-    path.insert(next);
-    cur_ans = min(cur_ans, solve(path, next, p, ans + 1001));
-    path.erase(path.find(next));
+    mark[next.first][next.second] = 1;
+    cur_ans = min(cur_ans, solve(mark, next, p, ans + 1001));
+    mark[next.first][next.second] = 0;
   }
 
   return cur_ans;
@@ -93,9 +91,15 @@ int main() {
     }
   }
 
-  set<pii> path;
-  path.insert(S);
-  cout << solve(path, S, 3, 0) << endl;
+  int mark[150][110];
+  for (int i = 0; i < 150; i++) {
+    for (int j = 0; j < 110; j++) {
+      mark[i][j] = 0;
+    }  
+  }
+
+  mark[S.first][S.second] = 1;
+  cout << solve(mark, S, 3, 0) << endl;
 
   return 0;
 }
