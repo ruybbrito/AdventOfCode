@@ -16,7 +16,7 @@ int combo_operand(int operand) {
 pair<string, int> operate(int opcode, int operand) {
   switch (opcode) {
     case 0: // adv
-      a =  a / pow(2, operand);
+      a = (a >> combo_operand(operand));
       break;
     case 1: // axl
       b = b ^ operand;
@@ -34,10 +34,10 @@ pair<string, int> operate(int opcode, int operand) {
     case 5: // out
       return make_pair(to_string(combo_operand(operand) % 8), -1);
     case 6: // bdv
-      b =  a / pow(2, operand);
+      b = (a >> combo_operand(operand));
       break;
     case 7: // cdv
-      c =  a / pow(2, operand);
+      c = (a >> combo_operand(operand));
       break;
   }
 
@@ -93,3 +93,7 @@ int main() {
   
   return 0; 
 }
+
+// 1,4,6,2,6,0,5,6,3
+// 4,5,7,5,5,6,0,6,3
+// 7,1,5,2,4,0,7,6,1
