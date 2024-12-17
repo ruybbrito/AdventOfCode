@@ -9,12 +9,13 @@ using namespace std;
 // dir = 3 -> left
 
 typedef pair<int, int> pii;
-typedef pair<pii, int> raindeer;
+typedef pair<pii, int> position;
+typedef pair<int, position> piii;
 
 pii S, E;
 vector<string> m;
 
-const int INF = 10000000;
+const int INF = 100000000;
 
 bool is_oob(vector<string>& m, pii pos) {
   return pos.first < 0 || pos.second < 0 || pos.first >= m.size() || pos.second >= m[0].size();
@@ -34,45 +35,52 @@ pii get_next(pii pos, int dir) {
   return make_pair(iNext, jNext);
 }
 
-bool can_go(int mark[150][110], pii pos, int dir) {
+bool can_go(pii pos, int dir) {
   pii next = get_next(pos, dir);
-  return !is_oob(m, next) && (m[next.first][next.second] == '.' || m[next.first][next.second] == 'E') && !mark[next.first][next.second];
+  return !is_oob(m, next) && (m[next.first][next.second] == '.' || m[next.first][next.second] == 'E');
 }
 
-int solve(int mark[150][110], pii pos, int dir, int ans) {
-  if (pos == E) {
-    return ans;
-  }
-  
-  int cur_ans = INF;
-  
-  // Go straight
-  if (can_go(mark, pos, dir)) {
-    pii next = get_next(pos, dir);
-    mark[next.first][next.second] = 1;
-    cur_ans = min(cur_ans, solve(mark, next, dir, ans + 1));
-    mark[next.first][next.second] = 0;
+vector<position> all_valid(pii pos, int dir) {
+  vector<pair<pii, int> > ans;
+  if (can_go(pos, dir)) ans.push_back(make_pair(get_next(pos, dir), dir));
+  if (can_go(pos, next_dir(dir))) ans.push_back(make_pair(get_next(pos, next_dir(dir)), next_dir(dir)));
+  if (can_go(pos, prev_dir(dir))) ans.push_back(make_pair(get_next(pos, prev_dir(dir)), prev_dir(dir)));
+  return ans;
+}
+
+int solve() {
+  priority_queue<piii, vector<piii>, greater<piii> > pq;
+
+  int dist[200][200];
+  for (int i = 0; i < 200; i++) {
+    for (int j = 0; j < 200; j++) {
+      dist[i][j] = INF;
+    }
   }
 
-  // Can turn right
-  int n = next_dir(dir);
-  if (can_go(mark, pos, n)) {
-    pii next = get_next(pos, n);
-    mark[next.first][next.second] = 1;
-    cur_ans = min(cur_ans, solve(mark, next, n, ans + 1001));
-    mark[next.first][next.second] = 0;
+  pq.push(make_pair(0, make_pair(S, 3)));
+  dist[S.first][S.second] = 0;
+
+  while (!pq.empty()) {
+    piii cur = pq.top();
+    pq.pop();
+
+    vector<position> valid = all_valid(cur.second.first, cur.second.second);
+    for (int i = 0; i < valid.size(); i++) {
+      pii next = get_next(cur.second.first, cur.second.second);
+      position adj = valid[i];
+      pii adj_pos = adj.first;
+      int adj_dir = adj.second;
+      int weight = adj.first == next ? 1 : 1001;
+
+      if (dist[adj_pos.first][adj_pos.second] > dist[cur.second.first.first][cur.second.first.second] + weight) {
+        dist[adj.first.first][adj.first.second] = dist[cur.second.first.first][cur.second.first.second] + weight;
+        pq.push(make_pair(dist[adj_pos.first][adj_pos.second], adj));
+      }
+    }
   }
 
-  // Can turn left
-  int p = prev_dir(dir);
-  if (can_go(mark, pos, p)) {
-    pii next = get_next(pos, p);
-    mark[next.first][next.second] = 1;
-    cur_ans = min(cur_ans, solve(mark, next, p, ans + 1001));
-    mark[next.first][next.second] = 0;
-  }
-
-  return cur_ans;
+  return dist[E.first][E.second];
 }
 
 int main() {
@@ -91,15 +99,7 @@ int main() {
     }
   }
 
-  int mark[150][110];
-  for (int i = 0; i < 150; i++) {
-    for (int j = 0; j < 110; j++) {
-      mark[i][j] = 0;
-    }  
-  }
-
-  mark[S.first][S.second] = 1;
-  cout << solve(mark, S, 3, 0) << endl;
+  cout << solve() << endl;
 
   return 0;
 }
