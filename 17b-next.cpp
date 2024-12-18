@@ -1,4 +1,5 @@
 #include <iostream>
+#include <map>
 
 using namespace std;
 
@@ -63,6 +64,14 @@ string bit_seq_from_vec(vector<long long int>& v) {
   return s;
 }
 
+int my_func(int X) {
+  return ((((X % 8)^2)^3)^(X>>((X % 8)^2))) % 8;
+}
+
+// int my_func(int X) {
+//   return X % 8;
+// }
+
 long long int to_decimal(string s) {
   string r = s;
   reverse(r.begin(), r.end());
@@ -101,9 +110,25 @@ int main() {
   }
 
   vector<long long int> pp = p;
+  pp.pop_back();
+  pp.insert(pp.begin(), p[0]);
   reverse(pp.begin(), pp.end());
 
-  a = 119138688672528LL, b = 0, c = 0;
+  map<int, int> conv;
+  for (int i = 0; i < 100; i++) {
+    conv[i] = my_func(i);
+    cout << i%8 << " " << conv[i] << endl;
+  }
+
+  for (int i = 0; i < pp.size(); i++) {
+    pp[i] = conv[pp[i]];
+  }
+
+  string bseq = bit_seq_from_vec(pp);
+  long long int dec = to_decimal(bseq);
+  cout << dec << endl;
+
+  a = to_decimal(bseq), b = 0, c = 0;
   ptr = 0;
 
   vector<long long int> ans;
@@ -134,102 +159,6 @@ int main() {
 
   return 0; 
 }
-
-
-// Register A: X
-// Register B: 0
-// Register C: 0
-
-// Program: 2,4,1,2,7,5,1,3,4,4,5,5,0,3,3,0
-
-// (a = X, b = 0, c = 0)
-
-// ptr = 0, input = (2, 4)
-// (a = X, b = X % 8, c = 0)
-
-// ptr = 2, input = (1, 2)
-// (a = X, b = (X % 8)^2, c = 0)
-
-// ptr = 4, input = (7, 5)
-// (a = X, b = (X % 8)^2, c = X >> ((X % 8)^2)
-
-// ptr = 6, input = (1, 3)
-// (a = X, b = ((X % 8)^2)^3, c = X >> ((X % 8)^2)
-
-// ptr = 8, input = (4, 4)
-// (a = X, b = (((X % 8)^2)^3)^(X >> ((X % 8)^2)), c = X >> (X % 8)^2)
-
-// ptr = 10, input = (5, 5)
-// 2 = (((X % 8)^2)^3)^(X >> (X % 8)^2)) % 8
-// (a = X, b = (((X % 8)^2)^3)^(X >> ((X % 8)^2)), c = X >> (X % 8)^2)
-
-// ptr = 12, input = (0, 3)
-// 2 = (((X % 8)^2)^3)^(X >> (X % 8)^2)) % 8
-// (a = X>>3, b = (((X % 8)^2)^3)^(X >> ((X % 8)^2)), c = X >> (X % 8)^2)
-
-// ptr = 12, input = (0, 3)
-// 2 = (((X % 8)^2)^3)^(X >> (X % 8)^2)) % 8
-// (a = X>>3, b = (((X % 8)^2)^3)^(X >> ((X % 8)^2)), c = X >> (X % 8)^2)
-
-// ptr = 0, input = (2, 4)
-// 2 = (((X % 8)^2)^3)^(X >> (X % 8)^2)) % 8
-// (a = X>>3, b = (X>>3) % 8, c = X >> (X % 8)^2)
-
-// ptr = 2, input = (1, 2)
-// 2 = (((X % 8)^2)^3)^(X >> (X % 8)^2)) % 8
-// (a = X>>3, b = ((X>>3)%8)^2, c = X >> (X % 8)^2)
-
-// ptr = 4, input = (7, 5)
-// 2 = (((X % 8)^2)^3)^(X >> (X % 8)^2)) % 8
-// (a = X>>3, b = ((X>>3)%8)^2, c = (X>>3)>>(((X>>3)%8)^2) )
-
-// ptr = 6, input = (1, 3)
-// 2 = (((X % 8)^2)^3)^(X >> (X % 8)^2)) % 8
-// (a = X>>3, b = (((X>>3)%8)^2)^3, c = (X>>3)>>(((X>>3)%8)^2) )
-
-// ptr = 8, input = (4, 4)
-// 2 = (((X % 8)^2)^3)^(X >> (X % 8)^2)) % 8
-// (a = X>>3, b = ((((X>>3)%8)^2)^3)^((X>>3)>>(((X>>3)%8)^2)), c = (X>>3)>>(((X>>3)%8)^2) )
-
-// ptr = 10, input = (5, 5)
-// 4 = ((((X>>3)%8)^2)^3)^((X>>3)>>(((X>>3)%8)^2))%8
-// (a = X>>3, b = ((((X>>3)%8)^2)^3)^((X>>3)>>(((X>>3)%8)^2)), c = (X>>3)>>(((X>>3)%8)^2) )
-
-// It's a number between 2^42 and 2^43
-
-
-
-
-
-// Register A: 117440 (011100101011000000) / 3,4,5,3,0,0 / 0,0,3,5,4,3 / 0,3,5,4,3,0
-// Register B: 0
-// Register C: 0
-
-// Program: 0,3,5,4,3,0
-
-// (a = 117440, b = 0, c = 0)
-
-// ptr = 0, input = (0, 3)
-// (a = 14680 (011100101011000), b = 3, c = 0)
-
-// ptr = 2, input = (5, 4)
-// 0,
-// (a = 14680 (011100101011000), b = 3, c = 0)
-
-// ptr = 4, input = (3, 0)
-// 0,
-// (a = 14680 (011100101011000), b = 3, c = 0)
-
-// ptr = 0, input = (0, 3)
-
-
-
-// 2,4,1,2,7,5,1,3,4,4,5,5,0,3,3,0
-// 3,3,0,5,5,4,4,3,1,5,7,2,1,4,2,0
-// 011011000101101100100011001101111010001100010000
-
-// 119138688672528
-
 
 
 // Solution:
