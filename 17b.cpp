@@ -5,7 +5,7 @@ using namespace std;
 long long int a, b, c;
 int ptr;
 
-int combo_operand(int operand) {
+long long int combo_operand(long long int operand) {
   if (operand <= 3) return operand;
   else if (operand == 4) return a;
   else if (operand == 5) return b;
@@ -13,7 +13,7 @@ int combo_operand(int operand) {
   else return 0;
 }
 
-pair<string, int> operate(int opcode, int operand) {
+pair<string, long long int> operate(long long int opcode, long long int operand) {
   switch (opcode) {
     case 0: // adv
       a = (a >> combo_operand(operand));
@@ -44,27 +44,37 @@ pair<string, int> operate(int opcode, int operand) {
   return make_pair("", -1);
 }
 
-bool vec_eq(vector<int> a, vector<int> b) {
-  if (a.size() != b.size()) return false;
-  for (int i = 0; i < a.size(); i++) {
-    if (a[i] != b[i]) return false;
-  }
-  return true;
-}
-
-string bit_seq(int n) {
-  if (n == 0) return "0";
+string bit_seq(long long int n) {
   string s = "";
   while (n) {
     s += to_string(n%2);
     n >>= 1;
   }
+  while (s.size() < 3) s += "0";
   reverse(s.begin(), s.end());
   return s;
 }
 
+string bit_seq_from_vec(vector<long long int>& v) {
+  string s = "";
+  for (int i = 0; i < v.size(); i++) {
+    s += bit_seq(v[i]);
+  }
+  return s;
+}
+
+long long int to_decimal(string s) {
+  string r = s;
+  reverse(r.begin(), r.end());
+  long long int ans = 0;
+  for (int i = r.size()-1; i >= 0; i--) {
+    ans += r[i] == '1' ? (1LL<<i) : 0;
+  }
+  return ans;
+}
+
 int main() {
-  vector<int> p;
+  vector<long long int> p;
   string s;
   while (getline(cin, s)) {
     if (s == "") continue;
@@ -90,16 +100,22 @@ int main() {
     }
   }
 
-  for (int i = 0; i < 200; i++) {
-    a = i, b = 0, c = 0;
+  vector<long long int> pp = p;
+  reverse(pp.begin(), pp.end());
+  string bseq = bit_seq_from_vec(pp);
+
+  for (int i = 0; i < bseq.size(); i++) {
+    cout << bseq << endl;
+
+    a = to_decimal(bseq), b = 0, c = 0;
     ptr = 0;
 
-    vector<int> ans;
+    vector<long long int> ans;
     while (ptr + 1 < p.size()) {
-      int opcode = p[ptr];
-      int operand = p[ptr+1];
+      long long int opcode = p[ptr];
+      long long int operand = p[ptr+1];
 
-      pair<string, int> out = operate(opcode, operand);
+      pair<string, long long int> out = operate(opcode, operand);
       if (out.second != -1) {
         ptr = out.second;
       } else {
@@ -107,24 +123,22 @@ int main() {
       }
 
       if (out.first.size() > 0) {
-        ans.push_back(stoi(out.first));
+        ans.push_back(stoll(out.first));
       }
     }
 
-    cout << i << endl;
-    cout << bit_seq(i) << endl;
     for (int j = 0; j < ans.size(); j++) {
       cout << ans[j] << " ";
     }
     cout << endl;
-    // for (int j = 0; j < p.size(); j++) {
-    //   cout << p[j] << " ";
-    // }
-    // cout << endl;
+    for (int j = 0; j < p.size(); j++) {
+      cout << p[j] << " ";
+    }
+    cout << endl;
 
-    // if (vec_eq(ans, p)) {
-    //   cout << options[i] << endl;
-    // }
+    char q = bseq.back();
+    bseq.pop_back();
+    bseq.insert(bseq.begin(), q);
   }
 
   return 0; 
@@ -191,3 +205,10 @@ int main() {
 // (a = X>>3, b = ((((X>>3)%8)^2)^3)^((X>>3)>>(((X>>3)%8)^2)), c = (X>>3)>>(((X>>3)%8)^2) )
 
 // It's a number between 2^42 and 2^43
+
+
+
+
+// 2 = (((X % 8)^2)^3)^(X >> (X % 8)^2)) % 8
+// 2 = ((X % 8)^1)^(X/(pow(2, X % 8))) % 8
+// 2 = ( (X % 8) ^ 1 ^ (X/(pow(2, X % 8))) ) % 8
