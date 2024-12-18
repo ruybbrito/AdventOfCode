@@ -15,6 +15,7 @@ typedef pair<int, position> piii;
 
 pii S, E;
 vector<string> m;
+set<pii> visited;
 
 const int INF = 100000000;
 
@@ -62,11 +63,10 @@ void print_solutions(set<pii>& visited) {
   }
 }
 
-int solve() {
+int dijkstra() {
   priority_queue<piii, vector<piii>, greater<piii> > pq;
 
   int dist[200][200];
-  set<pii> parents[200][200];
   for (int i = 0; i < 200; i++) {
     for (int j = 0; j < 200; j++) {
       dist[i][j] = INF;
@@ -86,40 +86,49 @@ int solve() {
       position adj = valid[i];
       pii adj_pos = adj.first;
       int adj_dir = adj.second;
-      int weight = adj_pos == next ? 1 : 1001;
+      int weight = adj.first == next ? 1 : 1001;
 
-      if (cur.second.first == make_pair(7, 4)) {
-        cout << adj_pos.first << " " << adj_pos.second << " " << weight << endl;
-        cout << dist[adj_pos.first][adj_pos.second] << endl;
-        cout << dist[cur.second.first.first][cur.second.first.second] << endl;
-        cout << parents[adj_pos.first][adj_pos.second].size() << endl;
-      }
-
-      if (dist[adj_pos.first][adj_pos.second] >= dist[cur.second.first.first][cur.second.first.second] + weight) {
-        dist[adj_pos.first][adj_pos.second] = dist[cur.second.first.first][cur.second.first.second] + weight;
-        parents[adj_pos.first][adj_pos.second].insert(cur.second.first);
+      if (dist[adj_pos.first][adj_pos.second] > dist[cur.second.first.first][cur.second.first.second] + weight) {
+        dist[adj.first.first][adj.first.second] = dist[cur.second.first.first][cur.second.first.second] + weight;
         pq.push(make_pair(dist[adj_pos.first][adj_pos.second], adj));
       }
     }
   }
 
-  set<pii> visited;
-  queue<pii> q;
-  q.push(E);
-  while (!q.empty()) {
-    pii top = q.front();
-    q.pop();
-    visited.insert(top);
-    
-    for (set<pii>::iterator it = parents[top.first][top.second].begin(); it != parents[top.first][top.second].end(); it++) {
-      q.push(*it);
+  return dist[E.first][E.second];
+}
+
+void solve(set<pii> &path, pii cur, int dir, int budget) {
+  if (cur == E) {
+    if (!budget) {
+      for (set<pii>::iterator it = path.begin(); it != path.end(); it++) {
+        visited.insert(*it);
+      }
+      cout << visited.size() << endl;
     }
+    return;
   }
 
-  print_solutions(visited);
+  if (budget < 0) {
+    return;
+  }
 
-  // return visited.size();
-  return dist[E.first][E.second];
+  vector<position> valid = all_valid(cur, dir);
+  for (int i = 0; i < valid.size(); i++) {
+    pii next = get_next(cur, dir);
+    position adj = valid[i];
+    pii adj_pos = adj.first;
+    int adj_dir = adj.second;
+    int weight = adj_pos == next ? 1 : 1001;
+
+    if (path.find(adj_pos) != path.end()) {
+      continue;
+    }
+
+    path.insert(adj_pos);
+    solve(path, adj_pos, adj_dir, budget - weight);
+    path.erase(adj_pos);
+  }
 }
 
 int main() {
@@ -138,7 +147,11 @@ int main() {
     }
   }
 
-  cout << solve() << endl;
+  int min_dist = dijkstra();
+  set<pii> path;
+  path.insert(S);
+  solve(path, S, 3, min_dist);
+  cout << visited.size() << endl;
 
   return 0;
 }
