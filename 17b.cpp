@@ -1,4 +1,5 @@
 #include <iostream>
+#include <map>
 
 using namespace std;
 
@@ -44,13 +45,13 @@ pair<string, long long int> operate(long long int opcode, long long int operand)
   return make_pair("", -1);
 }
 
-string bit_seq(long long int n) {
+string bit_seq(long long int n, int len) {
   string s = "";
   while (n) {
     s += to_string(n%2);
     n >>= 1;
   }
-  while (s.size() < 3) s += "0";
+  while (s.size() < len) s += "0";
   reverse(s.begin(), s.end());
   return s;
 }
@@ -58,9 +59,67 @@ string bit_seq(long long int n) {
 string bit_seq_from_vec(vector<long long int>& v) {
   string s = "";
   for (int i = 0; i < v.size(); i++) {
-    s += bit_seq(v[i]);
+    s += bit_seq(v[i], 3);
   }
   return s;
+}
+
+long long int my_func(long long int X) {
+  return ((((X % 8)^2)^3)^(X>>((X % 8)^2))) % 8;
+}
+
+bool vec_eq(vector<long long int> &a, vector<long long int> &b) {
+  for (int i = 0; i < a.size(); i++) {
+    if (a[i] != b[i]) return false;
+  }  
+  return true;
+}
+
+bool verify(vector<long long int> &pp, long long int aa) {
+  vector<long long int> p = pp;
+  reverse(p.begin(), p.end());
+
+  a = aa, b = 0, c = 0;
+  ptr = 0;
+
+  vector<long long int> ans;
+  while (ptr + 1 < p.size()) {
+    long long int opcode = p[ptr];
+    long long int operand = p[ptr+1];
+
+    pair<string, long long int> out = operate(opcode, operand);
+    if (out.second != -1) {
+      ptr = out.second;
+    } else {
+      ptr += 2;
+    }
+
+    if (out.first.size() > 0) {
+      ans.push_back(stoll(out.first));
+    }
+  }
+
+  if (vec_eq(ans, p)) {
+    cout << aa << endl;
+    return true;
+  }
+
+  return false;
+}
+
+void solve(vector<long long int> &pp, int idx, long long int a_cur) {
+  if (idx == pp.size()) {
+    verify(pp, a_cur);
+    return;
+  }
+
+  long long int b_cur = pp[idx];
+  for (long long int j = 0; j < 8; j++) {
+    long long int tmp = (a_cur << 3) + j;
+    if (my_func(tmp) == b_cur) {
+      solve(pp, idx+1, tmp);
+    }
+  }
 }
 
 long long int to_decimal(string s) {
@@ -103,139 +162,7 @@ int main() {
   vector<long long int> pp = p;
   reverse(pp.begin(), pp.end());
 
-  a = 119138688672528LL, b = 0, c = 0;
-  ptr = 0;
-
-  vector<long long int> ans;
-  while (ptr + 1 < p.size()) {
-    long long int opcode = p[ptr];
-    long long int operand = p[ptr+1];
-
-    pair<string, long long int> out = operate(opcode, operand);
-    if (out.second != -1) {
-      ptr = out.second;
-    } else {
-      ptr += 2;
-    }
-
-    if (out.first.size() > 0) {
-      ans.push_back(stoll(out.first));
-    }
-  }
-
-  for (int j = 0; j < ans.size(); j++) {
-    cout << ans[j] << " ";
-  }
-  cout << endl;
-  for (int j = 0; j < p.size(); j++) {
-    cout << p[j] << " ";
-  }
-  cout << endl;
+  solve(pp, 0, 0);
 
   return 0; 
 }
-
-
-// Register A: X
-// Register B: 0
-// Register C: 0
-
-// Program: 2,4,1,2,7,5,1,3,4,4,5,5,0,3,3,0
-
-// (a = X, b = 0, c = 0)
-
-// ptr = 0, input = (2, 4)
-// (a = X, b = X % 8, c = 0)
-
-// ptr = 2, input = (1, 2)
-// (a = X, b = (X % 8)^2, c = 0)
-
-// ptr = 4, input = (7, 5)
-// (a = X, b = (X % 8)^2, c = X >> ((X % 8)^2)
-
-// ptr = 6, input = (1, 3)
-// (a = X, b = ((X % 8)^2)^3, c = X >> ((X % 8)^2)
-
-// ptr = 8, input = (4, 4)
-// (a = X, b = (((X % 8)^2)^3)^(X >> ((X % 8)^2)), c = X >> (X % 8)^2)
-
-// ptr = 10, input = (5, 5)
-// 2 = (((X % 8)^2)^3)^(X >> (X % 8)^2)) % 8
-// (a = X, b = (((X % 8)^2)^3)^(X >> ((X % 8)^2)), c = X >> (X % 8)^2)
-
-// ptr = 12, input = (0, 3)
-// 2 = (((X % 8)^2)^3)^(X >> (X % 8)^2)) % 8
-// (a = X>>3, b = (((X % 8)^2)^3)^(X >> ((X % 8)^2)), c = X >> (X % 8)^2)
-
-// ptr = 12, input = (0, 3)
-// 2 = (((X % 8)^2)^3)^(X >> (X % 8)^2)) % 8
-// (a = X>>3, b = (((X % 8)^2)^3)^(X >> ((X % 8)^2)), c = X >> (X % 8)^2)
-
-// ptr = 0, input = (2, 4)
-// 2 = (((X % 8)^2)^3)^(X >> (X % 8)^2)) % 8
-// (a = X>>3, b = (X>>3) % 8, c = X >> (X % 8)^2)
-
-// ptr = 2, input = (1, 2)
-// 2 = (((X % 8)^2)^3)^(X >> (X % 8)^2)) % 8
-// (a = X>>3, b = ((X>>3)%8)^2, c = X >> (X % 8)^2)
-
-// ptr = 4, input = (7, 5)
-// 2 = (((X % 8)^2)^3)^(X >> (X % 8)^2)) % 8
-// (a = X>>3, b = ((X>>3)%8)^2, c = (X>>3)>>(((X>>3)%8)^2) )
-
-// ptr = 6, input = (1, 3)
-// 2 = (((X % 8)^2)^3)^(X >> (X % 8)^2)) % 8
-// (a = X>>3, b = (((X>>3)%8)^2)^3, c = (X>>3)>>(((X>>3)%8)^2) )
-
-// ptr = 8, input = (4, 4)
-// 2 = (((X % 8)^2)^3)^(X >> (X % 8)^2)) % 8
-// (a = X>>3, b = ((((X>>3)%8)^2)^3)^((X>>3)>>(((X>>3)%8)^2)), c = (X>>3)>>(((X>>3)%8)^2) )
-
-// ptr = 10, input = (5, 5)
-// 4 = ((((X>>3)%8)^2)^3)^((X>>3)>>(((X>>3)%8)^2))%8
-// (a = X>>3, b = ((((X>>3)%8)^2)^3)^((X>>3)>>(((X>>3)%8)^2)), c = (X>>3)>>(((X>>3)%8)^2) )
-
-// It's a number between 2^42 and 2^43
-
-
-
-
-
-// Register A: 117440 (011100101011000000) / 3,4,5,3,0,0 / 0,0,3,5,4,3 / 0,3,5,4,3,0
-// Register B: 0
-// Register C: 0
-
-// Program: 0,3,5,4,3,0
-
-// (a = 117440, b = 0, c = 0)
-
-// ptr = 0, input = (0, 3)
-// (a = 14680 (011100101011000), b = 3, c = 0)
-
-// ptr = 2, input = (5, 4)
-// 0,
-// (a = 14680 (011100101011000), b = 3, c = 0)
-
-// ptr = 4, input = (3, 0)
-// 0,
-// (a = 14680 (011100101011000), b = 3, c = 0)
-
-// ptr = 0, input = (0, 3)
-
-
-
-// 2,4,1,2,7,5,1,3,4,4,5,5,0,3,3,0
-// 3,3,0,5,5,4,4,3,1,5,7,2,1,4,2,0
-// 011011000101101100100011001101111010001100010000
-
-// 119138688672528
-
-
-
-// Solution:
-// 1. get last, add at the beginning
-// 2. reverse string
-// 3. find mapping between new values and old ones
-// 4. test all options
-//    4.1. transform in binary
-//    4.2. transform in decimal
