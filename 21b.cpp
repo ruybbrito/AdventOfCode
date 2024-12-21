@@ -90,7 +90,53 @@ vector<string> solve_first(string &s, string ans, int idx, int x, int y) {
   return vec_concat(up, down, left, right);
 }
 
-string solve_second(string &s) {
+vector<string> solve_second_old(string &s, string ans, int idx, int x, int y) {
+  if (idx == s.size()) {
+    vector<string> v;
+    v.push_back(ans);
+    return v;
+  }
+
+  if (K[x][y] == s[idx]) {
+    ans.push_back('A');
+    return solve_second_old(s, ans, idx + 1, x, y);
+  }
+
+  pii next = KI[s[idx]];
+  vector<string> up, down, left, right;
+
+  // Can go up
+  if (next.first < x && !is_oob_K(make_pair(x-1, y))) {
+    ans.push_back('^');
+    up = solve_second_old(s, ans, idx, x - 1, y);
+    ans.pop_back();
+  }
+
+  // Can go down
+  if (next.first > x && !is_oob_K(make_pair(x+1, y))) {
+    ans.push_back('v');
+    down = solve_second_old(s, ans, idx, x + 1, y);
+    ans.pop_back();
+  }
+  
+  // Can go right
+  if (next.second > y && !is_oob_K(make_pair(x, y+1))) {
+    ans.push_back('>');
+    left = solve_second_old(s, ans, idx, x, y + 1);
+    ans.pop_back();
+  }
+
+  // Can go left
+  if (next.second < y && !is_oob_K(make_pair(x, y-1))) {
+    ans.push_back('<');
+    right = solve_second_old(s, ans, idx, x, y - 1);
+    ans.pop_back();
+  }
+
+  return vec_concat(up, down, left, right);
+}
+
+string solve_second_new(string &s) {
   string ans = "";
   int x = 0, y = 2, cur = 0;
   while (cur < s.size()) {
@@ -135,7 +181,7 @@ long long int solve(string s, int depth) {
   for (int i = 0; i < ret.size(); i++) {
     string next = ret[i];
     for (int j = 0; j < depth; j++) {
-      next = solve_second(next);
+      next = solve_second_new(next);
     }
     
     min_len = min(min_len, solve_third(next));
@@ -266,12 +312,17 @@ long long int solve2(string s, int depth) {
   
   long long int min_len = INF;
   for (int i = 0; i < ret.size(); i++) {
-    pair<map<pcc, long long int>, char> state = initial_state(ret[i]);
-    for (int j = 0; j <= depth; j++) {
-      state = calculate_transitions(state.first, state.second);
+    ans = "";
+    vector<string> second = solve_second_old(ret[i], ans, 0, 0, 2);
+
+    for (int j = 0; j < second.size(); j++) {
+      pair<map<pcc, long long int>, char> state = initial_state(second[j]);
+      for (int k = 0; k < depth; k++) {
+        state = calculate_transitions(state.first, state.second);
+      }
+      
+      min_len = min(min_len, calculate_len(state.first));
     }
-    
-    min_len = min(min_len, calculate_len(state.first));
   }
 
   return min_len;
@@ -349,7 +400,6 @@ int main() {
   long long int ans = 0;
   while (cin >> s) {
     ans += (solve2(s, 24) * get_num(s));
-    cout << solve2(s, 24) << " " << get_num(s) << endl;
   }
   cout << ans << endl;
 
@@ -358,3 +408,4 @@ int main() {
 
 
 // 274856120650160
+// 265994052643760
