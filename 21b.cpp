@@ -24,7 +24,7 @@ bool is_oob_M(pii pos) {
 }
 
 bool is_oob_K(pii pos) {
-  return pos.first < 0 || pos.first >= 2 || pos.second < 0 || pos.second >= 3 || M[pos.first][pos.second] == '*';
+  return pos.first < 0 || pos.first >= 2 || pos.second < 0 || pos.second >= 3 || K[pos.first][pos.second] == '*';
 }
 
 vector<string> vec_concat(vector<string> a, vector<string> b, vector<string> c, vector<string> d) {
@@ -90,7 +90,7 @@ vector<string> solve_first(string &s, string ans, int idx, int x, int y) {
   return vec_concat(up, down, left, right);
 }
 
-vector<string> solve_second_old(string &s, string ans, int idx, int x, int y) {
+vector<string> solve_second(string &s, string ans, int idx, int x, int y) {
   if (idx == s.size()) {
     vector<string> v;
     v.push_back(ans);
@@ -99,7 +99,7 @@ vector<string> solve_second_old(string &s, string ans, int idx, int x, int y) {
 
   if (K[x][y] == s[idx]) {
     ans.push_back('A');
-    return solve_second_old(s, ans, idx + 1, x, y);
+    return solve_second(s, ans, idx + 1, x, y);
   }
 
   pii next = KI[s[idx]];
@@ -108,87 +108,86 @@ vector<string> solve_second_old(string &s, string ans, int idx, int x, int y) {
   // Can go up
   if (next.first < x && !is_oob_K(make_pair(x-1, y))) {
     ans.push_back('^');
-    up = solve_second_old(s, ans, idx, x - 1, y);
+    up = solve_second(s, ans, idx, x - 1, y);
     ans.pop_back();
   }
 
   // Can go down
   if (next.first > x && !is_oob_K(make_pair(x+1, y))) {
     ans.push_back('v');
-    down = solve_second_old(s, ans, idx, x + 1, y);
+    down = solve_second(s, ans, idx, x + 1, y);
     ans.pop_back();
   }
   
   // Can go right
   if (next.second > y && !is_oob_K(make_pair(x, y+1))) {
     ans.push_back('>');
-    left = solve_second_old(s, ans, idx, x, y + 1);
+    left = solve_second(s, ans, idx, x, y + 1);
     ans.pop_back();
   }
 
   // Can go left
   if (next.second < y && !is_oob_K(make_pair(x, y-1))) {
     ans.push_back('<');
-    right = solve_second_old(s, ans, idx, x, y - 1);
+    right = solve_second(s, ans, idx, x, y - 1);
     ans.pop_back();
   }
 
   return vec_concat(up, down, left, right);
 }
 
-string solve_second_new(string &s) {
-  string ans = "";
-  int x = 0, y = 2, cur = 0;
-  while (cur < s.size()) {
-    if (s[cur] == K[x][y]) {
-      ans.push_back('A');
-      cur++;
-    }
-    else {
-      pii at = make_pair(x, y);
-      pii next = KI[s[cur]];
-      int dx = abs(at.first - next.first), dy = abs(at.second - next.second);
-      while (dx--) ans.push_back(next.first > at.first ? 'v' : '^');
-      while (dy--) ans.push_back(next.second > at.second ? '>' : '<');
-      x = next.first, y = next.second;
-    }
-  }
-  return ans;
-}
+// string solve_second_new(string &s) {
+//   string ans = "";
+//   int x = 0, y = 2, cur = 0;
+//   while (cur < s.size()) {
+//     if (s[cur] == K[x][y]) {
+//       ans.push_back('A');
+//       cur++;
+//     }
+//     else {
+//       pii at = make_pair(x, y);
+//       pii next = KI[s[cur]];
+//       int dx = abs(at.first - next.first), dy = abs(at.second - next.second);
+//       while (dx--) ans.push_back(next.first > at.first ? 'v' : '^');
+//       while (dy--) ans.push_back(next.second > at.second ? '>' : '<');
+//       x = next.first, y = next.second;
+//     }
+//   }
+//   return ans;
+// }
 
-// Count how many ways we can build s from the current state
-long long int solve_third(string &s) {
-  long long int ans = 0;
-  int x = 0, y = 2, cur = 0;
-  while (cur < s.size()) {
-    if (s[cur] == K[x][y]) ans++, cur++;
-    else {
-      pii at = make_pair(x, y);
-      pii next = KI[s[cur]];
-      int dx = abs(at.first - next.first), dy = abs(at.second - next.second);
-      ans += dx + dy;
-      x = next.first, y = next.second;
-    }
-  }
-  return ans;
-}
+// long long int solve_third(string &s) {
+//   long long int ans = 0;
+//   int x = 0, y = 2, cur = 0;
+//   while (cur < s.size()) {
+//     if (s[cur] == K[x][y]) ans++, cur++;
+//     else {
+//       pii at = make_pair(x, y);
+//       pii next = KI[s[cur]];
+//       int dx = abs(at.first - next.first), dy = abs(at.second - next.second);
+//       ans += dx + dy;
+//       x = next.first, y = next.second;
+//     }
+//   }
+//   return ans;
+// }
 
-long long int solve(string s, int depth) {
-  string ans;
-  vector<string> ret = solve_first(s, ans, 0, 3, 2);
+// long long int solve(string s, int depth) {
+//   string ans;
+//   vector<string> ret = solve_first(s, ans, 0, 3, 2);
   
-  long long int min_len = INF;
-  for (int i = 0; i < ret.size(); i++) {
-    string next = ret[i];
-    for (int j = 0; j < depth; j++) {
-      next = solve_second_new(next);
-    }
+//   long long int min_len = INF;
+//   for (int i = 0; i < ret.size(); i++) {
+//     string next = ret[i];
+//     for (int j = 0; j < depth; j++) {
+//       next = solve_second_new(next);
+//     }
     
-    min_len = min(min_len, solve_third(next));
-  }
+//     min_len = min(min_len, solve_third(next));
+//   }
 
-  return min_len;
-}
+//   return min_len;
+// }
 
 //     +---+---+
 //     | ^ | A |
@@ -216,13 +215,13 @@ pair<map<pcc, long long int>, char> calculate_transitions(map<pcc, long long int
         }
       } else if (m.first == '<') {
         if (m.second == '^') {
-          trans = "A^>A";
+          trans = "A>^A";
         } else if (m.second == '>') {
           continue;
         } else if (m.second == 'v') {
           trans = "A>A";
         } else if (m.second == 'A') {
-          trans = "A^>>A";
+          trans = "A>>^A";
         }
       } else if (m.first == '>') {
         if (m.second == '^') {
@@ -306,18 +305,24 @@ long long int calculate_len(map<pcc, long long int> &transitions) {
   return ans;
 }
 
-long long int solve2(string s, int depth) {
+long long int solve(string s, int depth) {
   string ans;
   vector<string> ret = solve_first(s, ans, 0, 3, 2);
   
   long long int min_len = INF;
   for (int i = 0; i < ret.size(); i++) {
+    // pair<map<pcc, long long int>, char> state = initial_state(ret[i]);
+    // for (int k = 0; k < depth; k++) {
+    //   state = calculate_transitions(state.first, state.second);
+    // }
+
+    // min_len = min(min_len, calculate_len(state.first));
     ans = "";
-    vector<string> second = solve_second_old(ret[i], ans, 0, 0, 2);
+    vector<string> second = solve_second(ret[i], ans, 0, 0, 2);
 
     for (int j = 0; j < second.size(); j++) {
       pair<map<pcc, long long int>, char> state = initial_state(second[j]);
-      for (int k = 0; k < depth; k++) {
+      for (int k = 1; k < depth; k++) {
         state = calculate_transitions(state.first, state.second);
       }
       
@@ -381,15 +386,16 @@ void set_keypad_1() {
 }
 
 long long int get_num(string s) {
-  s.pop_back();
-  return stoll(s);
+  string ss = s;
+  ss.pop_back();
+  return stoll(ss);
 }
 
-void print_transitions(map<pcc, long long int> &transitions) {
-  for (map<pcc, long long int>::iterator it = transitions.begin(); it != transitions.end(); it++) {
-    cout << "(" << it->first.first << "," << it->first.second << ") " << it->second << endl;
-  }
-} 
+// void print_transitions(map<pcc, long long int> &transitions) {
+//   for (map<pcc, long long int>::iterator it = transitions.begin(); it != transitions.end(); it++) {
+//     cout << "(" << it->first.first << "," << it->first.second << ") " << it->second << endl;
+//   }
+// } 
 
 int main() {
   // Set keypads
@@ -399,7 +405,8 @@ int main() {
   string s;
   long long int ans = 0;
   while (cin >> s) {
-    ans += (solve2(s, 24) * get_num(s));
+    cout << get_num(s) << " " << solve(s, 25) << endl;
+    ans += (solve(s, 25) * get_num(s));
   }
   cout << ans << endl;
 
@@ -409,3 +416,7 @@ int main() {
 
 // 274856120650160
 // 265994052643760
+// 274379456744896
+// 1601417218531384
+// 425538413136652
+// 415296734621604 (not tried yet!)
