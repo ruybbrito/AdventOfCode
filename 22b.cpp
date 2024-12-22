@@ -76,19 +76,51 @@ string next_secret(string secret) {
   return prune(mix(secret, shift_left(secret, 11)));
 }
 
-int main() {
-  long long int n, ans = 0;
-  while (cin >> n) {
-    string secret = bit_seq(n);
-    for (int i = 0; i < K; i++) {
-      secret = next_secret(secret);
-    }
-    
-    ans += to_decimal(secret);
-  }
-  cout << ans << endl;
-  return 0;
+int get_code(vector<int> &v) {
+  int a = v[v.size()-1], b = v[v.size()-2], c = v[v.size()-3], d = v[v.size()-4];
+  return a + 100 * (b + 9) + 10000 * (c + 9) + 1000000 * (d + 9);
 }
 
+int main() {
+  long long int n;
+  int last, nlast;
+  map<int, int> m[2500];
+  int idx = 0;
 
-// 20068964552
+  while (cin >> n) {
+    vector<int> diffs;
+    string secret = bit_seq(n);
+    last = to_decimal(secret) % 10;
+    for (int i = 0; i < K; i++) {
+      secret = next_secret(secret);
+      nlast = to_decimal(secret) % 10;
+      diffs.push_back(nlast - last);
+      if (diffs.size() >= 4) {
+        int code = get_code(diffs);
+        if (m[idx][code] == 0) {
+          m[idx][code] = nlast;
+        }
+      }
+
+      last = nlast;
+    }
+    
+    idx++;
+    // cout << idx << endl;
+  }
+
+  map<int, int> res;
+  for (int i = 0; i < 2500; i++) {
+    for (map<int, int>::iterator it = m[i].begin(); it != m[i].end(); it++) {
+      res[it->first] += it->second;
+    }
+  }
+
+  int ans = 0;
+  for (map<int, int>::iterator it = res.begin(); it != res.end(); it++) {
+    ans = max(ans, it->second);
+  }
+  cout << ans << endl;
+
+  return 0;
+}
