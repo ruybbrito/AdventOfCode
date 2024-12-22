@@ -282,7 +282,7 @@ pair<map<pcc, long long int>, char> calculate_transitions(map<pcc, long long int
   }
 
   for (int i = 1; i < trans.size(); i++) {
-    next[make_pair(trans[i-1],trans[i])]++;
+    next[make_pair(trans[i-1], trans[i])]++;
   }
 
   return make_pair(next, trans[0]);
@@ -291,7 +291,7 @@ pair<map<pcc, long long int>, char> calculate_transitions(map<pcc, long long int
 pair<map<pcc, long long int>, char> initial_state(string &s) {
   map<pcc, long long int> next;
   for (int i = 1; i < s.size(); i++) {
-    next[make_pair(s[i-1],s[i])]++;
+    next[make_pair(s[i-1], s[i])]++;
   }
   
   return make_pair(next, s[0]);
@@ -419,4 +419,4 @@ int main() {
 // 274379456744896
 // 1601417218531384
 // 425538413136652
-// 415296734621604 (not tried yet!)
+// 415296734621604
