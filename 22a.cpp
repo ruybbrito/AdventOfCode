@@ -33,8 +33,7 @@ string shift_left(string s, int n) {
 }
 
 string shift_right(string s, int n) {
-  while (n--) s.pop_back();
-  return s;
+  return s.substr(0, s.size() - n);
 }
 
 char ch_xor(char a, char b) {
@@ -42,31 +41,20 @@ char ch_xor(char a, char b) {
 }
 
 string mix(string a, string b) {
-  string aa = a, bb = b;
   string c;
-  reverse(aa.begin(), aa.end());
-  reverse(bb.begin(), bb.end());
-  int ptr = 0;
-  for (; ptr < min(aa.size(), bb.size()); ptr++) {
-    c.push_back(ch_xor(aa[ptr], bb[ptr]));
-  }
-  while (ptr < aa.size()) {
-    c.push_back(aa[ptr]);
-    ptr++;
-  }
-  while (ptr < bb.size()) {
-    c.push_back(bb[ptr]);
-    ptr++;
+  reverse(a.begin(), a.end());
+  reverse(b.begin(), b.end());
+  for (int ptr = 0; ptr < max(a.size(), b.size()); ptr++) {
+    if (ptr < min(a.size(), b.size())) c.push_back(ch_xor(a[ptr], b[ptr]));
+    else if (ptr < a.size()) c.push_back(a[ptr]);
+    else if (ptr < b.size()) c.push_back(b[ptr]);
   }
   reverse(c.begin(), c.end());
   return c;
 }
 
 string prune(string s) {
-  reverse(s.begin(), s.end());
-  string v = s.substr(0, 24);
-  reverse(v.begin(), v.end());
-  return v;
+  return s.size() <= 24 ? s : s.substr(s.size() - 24); 
 }
 
 string next_secret(string secret) {
