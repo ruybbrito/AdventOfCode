@@ -90,105 +90,6 @@ vector<string> solve_first(string &s, string ans, int idx, int x, int y) {
   return vec_concat(up, down, left, right);
 }
 
-vector<string> solve_second(string &s, string ans, int idx, int x, int y) {
-  if (idx == s.size()) {
-    vector<string> v;
-    v.push_back(ans);
-    return v;
-  }
-
-  if (K[x][y] == s[idx]) {
-    ans.push_back('A');
-    return solve_second(s, ans, idx + 1, x, y);
-  }
-
-  pii next = KI[s[idx]];
-  vector<string> up, down, left, right;
-
-  // Can go up
-  if (next.first < x && !is_oob_K(make_pair(x-1, y))) {
-    ans.push_back('^');
-    up = solve_second(s, ans, idx, x - 1, y);
-    ans.pop_back();
-  }
-
-  // Can go down
-  if (next.first > x && !is_oob_K(make_pair(x+1, y))) {
-    ans.push_back('v');
-    down = solve_second(s, ans, idx, x + 1, y);
-    ans.pop_back();
-  }
-  
-  // Can go right
-  if (next.second > y && !is_oob_K(make_pair(x, y+1))) {
-    ans.push_back('>');
-    left = solve_second(s, ans, idx, x, y + 1);
-    ans.pop_back();
-  }
-
-  // Can go left
-  if (next.second < y && !is_oob_K(make_pair(x, y-1))) {
-    ans.push_back('<');
-    right = solve_second(s, ans, idx, x, y - 1);
-    ans.pop_back();
-  }
-
-  return vec_concat(up, down, left, right);
-}
-
-// string solve_second_new(string &s) {
-//   string ans = "";
-//   int x = 0, y = 2, cur = 0;
-//   while (cur < s.size()) {
-//     if (s[cur] == K[x][y]) {
-//       ans.push_back('A');
-//       cur++;
-//     }
-//     else {
-//       pii at = make_pair(x, y);
-//       pii next = KI[s[cur]];
-//       int dx = abs(at.first - next.first), dy = abs(at.second - next.second);
-//       while (dx--) ans.push_back(next.first > at.first ? 'v' : '^');
-//       while (dy--) ans.push_back(next.second > at.second ? '>' : '<');
-//       x = next.first, y = next.second;
-//     }
-//   }
-//   return ans;
-// }
-
-// long long int solve_third(string &s) {
-//   long long int ans = 0;
-//   int x = 0, y = 2, cur = 0;
-//   while (cur < s.size()) {
-//     if (s[cur] == K[x][y]) ans++, cur++;
-//     else {
-//       pii at = make_pair(x, y);
-//       pii next = KI[s[cur]];
-//       int dx = abs(at.first - next.first), dy = abs(at.second - next.second);
-//       ans += dx + dy;
-//       x = next.first, y = next.second;
-//     }
-//   }
-//   return ans;
-// }
-
-// long long int solve(string s, int depth) {
-//   string ans;
-//   vector<string> ret = solve_first(s, ans, 0, 3, 2);
-  
-//   long long int min_len = INF;
-//   for (int i = 0; i < ret.size(); i++) {
-//     string next = ret[i];
-//     for (int j = 0; j < depth; j++) {
-//       next = solve_second_new(next);
-//     }
-    
-//     min_len = min(min_len, solve_third(next));
-//   }
-
-//   return min_len;
-// }
-
 //     +---+---+
 //     | ^ | A |
 // +---+---+---+
@@ -205,58 +106,58 @@ pair<map<pcc, long long int>, char> calculate_transitions(map<pcc, long long int
     } else {
       if (m.first == '^') {
         if (m.second == '<') {
-          trans = "Av<A";
+          trans = "Av<A"; // Checked
         } else if (m.second == '>') {
-          trans = "Av>A";
+          trans = "Av>A"; // Checked
         } else if (m.second == 'v') {
-          continue;
+          trans = "AvA"; // Checked
         } else if (m.second == 'A') {
-          trans = "A>A";
+          trans = "A>A"; // Checked
         }
       } else if (m.first == '<') {
         if (m.second == '^') {
-          trans = "A>^A";
+          trans = "A>^A"; // Checked
         } else if (m.second == '>') {
-          continue;
+          trans = "A>>A"; // Checked
         } else if (m.second == 'v') {
-          trans = "A>A";
+          trans = "A>A"; // Checked
         } else if (m.second == 'A') {
-          trans = "A>>^A";
+          trans = "A>>^A"; // Checked
         }
       } else if (m.first == '>') {
         if (m.second == '^') {
-          trans = "A^<A";
+          trans = "A<^A"; // Checked
         } else if (m.second == '<') {
-          continue;
+          trans = "A<<A"; // Checked
         } else if (m.second == 'v') {
-          trans = "A<A";
+          trans = "A<A"; // Checked
         } else if (m.second == 'A') {
-          trans = "A^A";
+          trans = "A^A"; // Checked
         }
       } else if (m.first == 'v') {
         if (m.second == '^') {
-          continue;
+          trans = "A^A"; // Checked
         } else if (m.second == '<') {
-          trans = "A<A";
+          trans = "A<A"; // Checked
         } else if (m.second == '>') {
-          trans = "A>A";
+          trans = "A>A"; // Checked
         } else if (m.second == 'A') {
-          trans = "A^>A";
+          trans = "A^>A"; // Checked
         }
       } else if (m.first == 'A') {
         if (m.second == '^') {
-          trans = "A<A";
+          trans = "A<A"; // Checked
         } else if (m.second == '<') {
-          trans = "Av<<A";
+          trans = "Av<<A"; // Checked
         } else if (m.second == '>') {
-          trans = "AvA";
+          trans = "AvA"; // Checked
         } else if (m.second == 'v') {
-          trans = "Av<A";
+          trans = "A<vA"; // Checked
         }
       }
 
       for (int i = 1; i < trans.size(); i++) {
-        next[make_pair(trans[i-1],trans[i])] += it->second;
+        next[make_pair(trans[i-1], trans[i])] += it->second;
       }
     }
   }
@@ -265,24 +166,24 @@ pair<map<pcc, long long int>, char> calculate_transitions(map<pcc, long long int
   string trans = "";
   switch (first_character) {
     case '^':
-      trans = "<A";
+      trans = "<A"; // Checked
       break;
     case '<':
-      trans = "v<<A";
+      trans = "v<<A"; // Checked
       break;
     case '>':
-      trans = "vA";
+      trans = "vA"; // Checked
       break;
     case 'v':
-      trans = "v<A";
+      trans = "<vA"; // Checked
       break;
     case 'A':
-      trans = "A";
+      trans = "A"; // Checked
       break;
   }
 
   for (int i = 1; i < trans.size(); i++) {
-    next[make_pair(trans[i-1], trans[i])]++;
+    next[make_pair(trans[i-1], trans[i])] += 1LL;
   }
 
   return make_pair(next, trans[0]);
@@ -311,23 +212,12 @@ long long int solve(string s, int depth) {
   
   long long int min_len = INF;
   for (int i = 0; i < ret.size(); i++) {
-    // pair<map<pcc, long long int>, char> state = initial_state(ret[i]);
-    // for (int k = 0; k < depth; k++) {
-    //   state = calculate_transitions(state.first, state.second);
-    // }
-
-    // min_len = min(min_len, calculate_len(state.first));
-    ans = "";
-    vector<string> second = solve_second(ret[i], ans, 0, 0, 2);
-
-    for (int j = 0; j < second.size(); j++) {
-      pair<map<pcc, long long int>, char> state = initial_state(second[j]);
-      for (int k = 1; k < depth; k++) {
-        state = calculate_transitions(state.first, state.second);
-      }
-      
-      min_len = min(min_len, calculate_len(state.first));
+    pair<map<pcc, long long int>, char> state = initial_state(ret[i]);
+    for (int k = 0; k < depth; k++) {
+      state = calculate_transitions(state.first, state.second);
     }
+
+    min_len = min(min_len, calculate_len(state.first));
   }
 
   return min_len;
@@ -391,12 +281,6 @@ long long int get_num(string s) {
   return stoll(ss);
 }
 
-// void print_transitions(map<pcc, long long int> &transitions) {
-//   for (map<pcc, long long int>::iterator it = transitions.begin(); it != transitions.end(); it++) {
-//     cout << "(" << it->first.first << "," << it->first.second << ") " << it->second << endl;
-//   }
-// } 
-
 int main() {
   // Set keypads
   set_keypad_0();
@@ -405,7 +289,6 @@ int main() {
   string s;
   long long int ans = 0;
   while (cin >> s) {
-    cout << get_num(s) << " " << solve(s, 25) << endl;
     ans += (solve(s, 25) * get_num(s));
   }
   cout << ans << endl;
@@ -413,10 +296,11 @@ int main() {
   return 0; 
 }
 
-
 // 274856120650160
 // 265994052643760
 // 274379456744896
 // 1601417218531384
 // 425538413136652
 // 415296734621604
+// 271308640918218
+// 231309103124520 (correct!)
