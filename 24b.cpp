@@ -11,13 +11,7 @@ typedef pair<string, string> pss;
 // op = 1 –> AND
 // op = 2 –> XOR
 
-// (64892933710960)
-string expected_seq = "1110110000010100010000010000110010010001110000";
-
-// 312 nodes in total
-// 45 nodes x, 45 nodes y, 46 nodes z
-// 11 nodes z are wrong
-// 169 nodes could be wrong
+string expected_seq = "";
 
 map<string, int> value;
 set<string> keys;
@@ -94,6 +88,16 @@ void check_str_depth() {
     string z = "z" + num;
     check_depth(z);
   }
+}
+
+string bit_seq(long long int n) {
+  string s = "";
+  while (n) {
+    s += to_string(n%2);
+    n >>= 1;
+  }
+  reverse(s.begin(), s.end());
+  return s;
 }
 
 string simulate_and_find_bit_seq() {
@@ -220,8 +224,62 @@ void solve(map<string, string> &swaps, int cur) {
   return;
 }
 
+void print_tree(string prefix, string key, bool is_left) {
+  cout << prefix;
+  cout << (is_left ? "├─" : "└─" );
+  cout << key << endl;
+
+  if (operands.find(key) != operands.end()) {
+    for (int i = 0; i < operands[key].size(); i++) {
+      string left = depth[operands[key][i].first] < depth[operands[key][i].second] ? operands[key][i].first : operands[key][i].second;
+      string right = left == operands[key][i].first ? operands[key][i].second : operands[key][i].first;
+      
+      print_tree(prefix + (is_left ? "│ " : "  "), left, true);
+      print_tree(prefix + (is_left ? "│ " : "  "), right, false);
+    }
+  }
+}
+
+void print_all_roots() {
+  for (int i = 0; i <= 45; i++) {
+    string num = to_string(i);
+    if (num.size() == 1) num = "0" + num;
+    string z = "z" + num;
+    print_tree("", z, false);
+  }
+}
+
+void set_expected_seq() {
+  string x_seq = "", y_seq = "";
+  for (int i = 0; i <= 44; i++) {
+    string num = to_string(i);
+    if (num.size() == 1) num = "0" + num;
+    string x = "x" + num;
+    x_seq += (value[x] ? '1' : '0');
+    string y = "y" + num;
+    y_seq += (value[y] ? '1' : '0');
+  }
+
+  reverse(x_seq.begin(), x_seq.end());
+  reverse(y_seq.begin(), y_seq.end());
+
+  cout << to_decimal(x_seq) << endl;
+  cout << to_decimal(y_seq) << endl;
+
+  expected_seq = bit_seq(to_decimal(x_seq) + to_decimal(y_seq));
+}
+
 int main() {
   map<string, string> swaps;
+  swaps["djg"] = "z12";
+  swaps["z12"] = "djg";
+  swaps["sbg"] = "z19";
+  swaps["z19"] = "sbg";
+  swaps["mcq"] = "hjm";
+  swaps["hjm"] = "mcq";
+  swaps["dsd"] = "z37";
+  swaps["z37"] = "dsd";
+
   string s;
   while (getline(cin, s)) {
     if (s == "") continue;
@@ -235,11 +293,16 @@ int main() {
       keys.insert(ss[2]);
       keys.insert(ss[4]);
 
+      if (swaps[ss[4]] != "") {
+        ss[4] = swaps[ss[4]];
+      }
+
       operations[ss[0]].push_back(make_pair(make_pair(ss[2], ss[4]), get_op(ss[1])));
       operands[ss[4]].push_back(make_pair(ss[0], ss[2]));
     }
   }
 
+  set_expected_seq();
   string bit_seq = simulate_and_find_bit_seq();
 
   cout << bit_seq << endl;
@@ -247,7 +310,19 @@ int main() {
   cout << to_decimal(bit_seq) << endl;
   cout << to_decimal(expected_seq) << endl;
 
-  solve(swaps, 0);
+  check_str_depth();
+  print_all_roots();
+  // solve(swaps, 0);
+
+  set<string> swapped;
+  for (map<string, string>::iterator it = swaps.begin(); it != swaps.end(); it++) {
+    if (swaps[it->first] != "") swapped.insert(it->first);
+  }
+
+  for (set<string>::iterator it = swapped.begin(); it != swapped.end(); it++) {
+    cout << *it << ",";
+  }
+  cout << endl;
 
   return 0; 
 }
