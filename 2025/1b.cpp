@@ -15,12 +15,14 @@ int main() {
     s = s.substr(1, s.size()-1);
     int k = stoi(s);
     int t = dir ? n+k : n-k;
-    n = dir ? safe_mod(n+k, 100) : safe_mod(n-k, 100);
-    if (k >= 100) {
-        ans += k/100;
-    } else if (t >= 100 || t <= 0) {
-        ans++;
+    if (dir) { // R
+        if (k >= 100-n) ans++;
+        ans += abs((k-100+n)/100);
+    } else { // L
+        if (n && k >= n) ans++;
+        ans += abs((k-n)/100);
     }
+    n = safe_mod(t, 100);
   }
   cout << ans << endl;
   return 0;
